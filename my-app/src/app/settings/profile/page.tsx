@@ -115,7 +115,6 @@ export default function ProfilePage() {
   const [previewFile, setPreviewFile] = useState<File | null>(null);
   const { appBackground, useCustomBackground } = useAppearance();
 
-  
   useEffect(() => {
     if (authLoading) return;
     if (!authUser) {
@@ -177,6 +176,14 @@ export default function ProfilePage() {
     }
   }, [toast, handleUpdatePhotoUrl]);
 
+
+  if (loading || authLoading) {
+    return <ProfileSkeleton />;
+  }
+
+  if (!user) {
+    return <div className="text-center text-muted-foreground">User not found. Please log in again.</div>;
+  }
 
   const handleNameInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value);
@@ -270,14 +277,6 @@ export default function ProfilePage() {
             variant: "destructive"
         });
     }
-  }
-
-  if (loading || authLoading) {
-    return <ProfileSkeleton />;
-  }
-
-  if (!user) {
-    return <div className="text-center text-muted-foreground">User not found. Please log in again.</div>;
   }
 
   const isSaveDisabled = !user || (name === user.name && about === (user.about || ''));
