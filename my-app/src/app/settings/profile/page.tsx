@@ -57,7 +57,6 @@ async function uploadToCloudinaryXHR(
   });
 }
 
-
 function ProfileSkeleton() {
     return (
         <div className="space-y-8 animate-fade-in p-4 sm:p-6 lg:p-8">
@@ -98,7 +97,6 @@ function ProfileSkeleton() {
     )
 }
 
-
 export default function ProfilePage() {
   const { user: authUser, loading: authLoading } = useAuth();
   const [user, setUser] = useState<UserType | null>(null);
@@ -112,7 +110,6 @@ export default function ProfilePage() {
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
-
   const [previewFile, setPreviewFile] = useState<File | null>(null);
   const { appBackground, useCustomBackground } = useAppearance();
 
@@ -175,6 +172,7 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, [authUser, authLoading]);
 
+  // Conditional returns must come AFTER all hooks have been called.
   if (loading || authLoading) {
     return <ProfileSkeleton />;
   }
