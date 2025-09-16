@@ -31,7 +31,7 @@ export function MobileProvider({ children }: { children: ReactNode }) {
   const [isMobileDesign, setMobileDesignState] = useState(true);
   const isMobile = useMediaQuery('(max-width: 768px)');
   
-  const [height, setHeight] = useState(window.innerHeight);
+  const [height, setHeight] = useState(0);
 
   useEffect(() => {
     const savedMobileDesign = localStorage.getItem('mobile_redesign');
