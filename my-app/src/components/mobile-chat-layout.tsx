@@ -20,6 +20,7 @@ export function MobileChatLayout() {
   } = useAppShell();
   const { height } = useMobileDesign();
 
+  // Use the JS-calculated height. Fallback to 100dvh only if height is 0.
   const layoutStyle = {
     height: height ? `${height}px` : '100dvh',
   };

@@ -102,10 +102,13 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(({
         } else if (scrollAnchor) {
             viewport.scrollTop = scrollAnchor.top + (viewport.scrollHeight - scrollAnchor.height);
             setScrollAnchor(null);
+        } else if (messages.length > 0 && messages[messages.length - 1].senderId === currentUser.uid) {
+            // Always scroll to bottom if the last message is from the current user
+            viewport.scrollTop = viewport.scrollHeight;
         } else if (messages.length === 1) { // Specifically for the first message in a chat
             viewport.scrollTop = viewport.scrollHeight;
         }
-    }, [messages, isInitialLoad, scrollAnchor]);
+    }, [messages, isInitialLoad, scrollAnchor, currentUser.uid]);
     
     
     const handleLoadMore = async () => {

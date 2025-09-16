@@ -42,8 +42,10 @@ export function MobileProvider({ children }: { children: ReactNode }) {
 
     const setVisualViewportHeight = () => {
         if (window.visualViewport) {
+            // Use the visualViewport height which correctly accounts for the keyboard
             setHeight(window.visualViewport.height);
         } else {
+            // Fallback for older browsers
             setHeight(window.innerHeight);
         }
     };
@@ -54,6 +56,7 @@ export function MobileProvider({ children }: { children: ReactNode }) {
         window.visualViewport.addEventListener('resize', setVisualViewportHeight);
         return () => window.visualViewport?.removeEventListener('resize', setVisualViewportHeight);
     } else {
+        // Fallback for older browsers
          window.addEventListener('resize', setVisualViewportHeight);
         return () => window.removeEventListener('resize', setVisualViewportHeight);
     }
