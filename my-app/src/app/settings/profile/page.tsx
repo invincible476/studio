@@ -120,10 +120,8 @@ export default function ProfilePage() {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error("No authenticated user found.");
     
-    // Update Firebase Auth profile
     await updateProfile(currentUser, { photoURL: newPhotoUrl });
     
-    // Update Firestore document
     const userDocRef = doc(db, 'users', currentUser.uid);
     await updateDoc(userDocRef, { photoURL: newPhotoUrl });
     
