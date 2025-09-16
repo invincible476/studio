@@ -57,9 +57,10 @@ async function uploadToCloudinaryXHR(
   });
 }
 
+
 function ProfileSkeleton() {
     return (
-        <div className="space-y-8 animate-fade-in">
+        <div className="space-y-8 animate-fade-in p-4 sm:p-6 lg:p-8">
             <div>
                 <Skeleton className="h-9 w-40" />
                 <Skeleton className="h-5 w-64 mt-2" />
@@ -176,13 +177,12 @@ export default function ProfilePage() {
     }
   }, [toast, handleUpdatePhotoUrl]);
 
-
   if (loading || authLoading) {
     return <ProfileSkeleton />;
   }
 
   if (!user) {
-    return <div className="text-center text-muted-foreground">User not found. Please log in again.</div>;
+    return <div className="text-center text-muted-foreground p-8">User not found. Please log in again.</div>;
   }
 
   const handleNameInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -283,7 +283,7 @@ export default function ProfilePage() {
 
   return (
     <motion.div 
-        className="space-y-8"
+        className="space-y-8 p-4 sm:p-6 lg:p-8"
         initial="initial"
         animate="animate"
         variants={{
@@ -424,3 +424,5 @@ export default function ProfilePage() {
     </motion.div>
   );
 }
+
+    
