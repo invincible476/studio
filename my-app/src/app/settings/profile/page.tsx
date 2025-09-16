@@ -116,29 +116,6 @@ export default function ProfilePage() {
   const [previewFile, setPreviewFile] = useState<File | null>(null);
   const { appBackground, useCustomBackground } = useAppearance();
 
-  useEffect(() => {
-    if (authLoading) return;
-    if (!authUser) {
-      setLoading(false);
-      return;
-    };
-
-    const userDocRef = doc(db, 'users', authUser.uid);
-    const unsubscribe = onSnapshot(userDocRef, (doc) => {
-        if (doc.exists()) {
-            const userData = { id: doc.id, ...doc.data() } as UserType;
-            setUser(userData);
-            setName(userData.name || '');
-            setAbout(userData.about || '');
-            setAvatarUrl(userData.photoURL || '');
-            setIsPrivate(userData.isPrivate || false);
-        }
-        setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [authUser, authLoading]);
-
   const handleUpdatePhotoUrl = useCallback(async (newPhotoUrl: string) => {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error("No authenticated user found.");
@@ -176,6 +153,29 @@ export default function ProfilePage() {
         setPreviewFile(null);
     }
   }, [toast, handleUpdatePhotoUrl]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!authUser) {
+      setLoading(false);
+      return;
+    };
+
+    const userDocRef = doc(db, 'users', authUser.uid);
+    const unsubscribe = onSnapshot(userDocRef, (doc) => {
+        if (doc.exists()) {
+            const userData = { id: doc.id, ...doc.data() } as UserType;
+            setUser(userData);
+            setName(userData.name || '');
+            setAbout(userData.about || '');
+            setAvatarUrl(userData.photoURL || '');
+            setIsPrivate(userData.isPrivate || false);
+        }
+        setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [authUser, authLoading]);
 
   if (loading || authLoading) {
     return <ProfileSkeleton />;
