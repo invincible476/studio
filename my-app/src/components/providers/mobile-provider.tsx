@@ -31,7 +31,7 @@ export function MobileProvider({ children }: { children: ReactNode }) {
   const [isMobileDesign, setMobileDesignState] = useState(true);
   const isMobile = useMediaQuery('(max-width: 768px)');
   
-  const [height, setHeight] = useState(0);
+  const [height, setHeight] = useState(window.innerHeight);
 
   useEffect(() => {
     const savedMobileDesign = localStorage.getItem('mobile_redesign');
@@ -40,26 +40,23 @@ export function MobileProvider({ children }: { children: ReactNode }) {
     setMobileDesignState(isEnabled);
     document.body.dataset.mobile = isEnabled ? "true" : "false";
 
-    const handleResize = () => {
-      // Use visualViewport on mobile for better accuracy with virtual keyboard
-      const newHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-      setHeight(newHeight);
+    const setVisualViewportHeight = () => {
+        if (window.visualViewport) {
+            setHeight(window.visualViewport.height);
+        } else {
+            setHeight(window.innerHeight);
+        }
     };
 
+    setVisualViewportHeight();
+
     if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleResize);
+        window.visualViewport.addEventListener('resize', setVisualViewportHeight);
+        return () => window.visualViewport?.removeEventListener('resize', setVisualViewportHeight);
     } else {
-      window.addEventListener('resize', handleResize);
+         window.addEventListener('resize', setVisualViewportHeight);
+        return () => window.removeEventListener('resize', setVisualViewportHeight);
     }
-    handleResize(); // Initial call
-    
-    return () => {
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', handleResize);
-      } else {
-        window.removeEventListener('resize', handleResize);
-      }
-    };
 
   }, []);
 

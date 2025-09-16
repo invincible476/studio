@@ -21,7 +21,7 @@ export function MobileChatLayout() {
   const { height } = useMobileDesign();
 
   const layoutStyle = {
-    height: height ? `${height}px` : '100vh',
+    height: height ? `${height}px` : '100dvh',
   };
 
   return (
