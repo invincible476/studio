@@ -77,7 +77,7 @@ export function MobileProvider({ children }: { children: ReactNode }) {
   return (
     <MobileDesignContext.Provider value={{ isMobileDesign, setIsMobileDesign, isMobileView, height }}>
       {children}
-    </MobileDesignContext.Provider>
+    </MobileDesign-context.Provider>
   );
 }
 
