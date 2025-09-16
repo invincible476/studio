@@ -139,6 +139,44 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, [authUser, authLoading]);
 
+  const handleUpdatePhotoUrl = useCallback(async (newPhotoUrl: string) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error("No authenticated user found.");
+    
+    // Update Firebase Auth profile
+    await updateProfile(currentUser, { photoURL: newPhotoUrl });
+    
+    // Update Firestore document
+    const userDocRef = doc(db, 'users', currentUser.uid);
+    await updateDoc(userDocRef, { photoURL: newPhotoUrl });
+    
+    setAvatarUrl(newPhotoUrl);
+    toast({ title: 'Success', description: 'Your avatar has been updated.' });
+  }, [toast]);
+
+  const handleAvatarUpload = useCallback(async (file: File) => {
+    setIsUploading(true);
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+    if (!cloudName || !uploadPreset) {
+        toast({ title: 'Cloudinary config missing', variant: 'destructive' });
+        setIsUploading(false);
+        return;
+    }
+
+    try {
+        const result = await uploadToCloudinaryXHR(file, cloudName, uploadPreset);
+        await handleUpdatePhotoUrl(result.secure_url);
+    } catch (error) {
+        console.error("Error uploading avatar to Cloudinary:", error);
+        toast({ title: 'Error', description: 'Failed to upload new avatar.', variant: 'destructive' });
+    } finally {
+        setIsUploading(false);
+        setPreviewFile(null);
+    }
+  }, [toast, handleUpdatePhotoUrl]);
+
 
   if (loading || authLoading) {
     return <ProfileSkeleton />;
@@ -152,21 +190,6 @@ export default function ProfilePage() {
     setName(event.target.value);
   }
   
- const handleUpdatePhotoUrl = async (newPhotoUrl: string) => {
-    const currentUser = auth.currentUser;
-    if (!currentUser) throw new Error("No authenticated user found.");
-    
-    // Update Firebase Auth profile
-    await updateProfile(currentUser, { photoURL: newPhotoUrl });
-    
-    // Update Firestore document
-    const userDocRef = doc(db, 'users', currentUser.uid);
-    await updateDoc(userDocRef, { photoURL: newPhotoUrl });
-    
-    setAvatarUrl(newPhotoUrl);
-    toast({ title: 'Success', description: 'Your avatar has been updated.' });
-  }
-
   const handleSetAvatarFromUrl = async () => {
     if (!avatarUrl) {
       toast({ title: 'Error', description: 'Please enter a URL.', variant: 'destructive' });
@@ -191,30 +214,6 @@ export default function ProfilePage() {
         if(fileInputRef.current) fileInputRef.current.value = '';
     }
   };
-
-  const handleAvatarUpload = useCallback(async (file: File) => {
-    setIsUploading(true);
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-
-    if (!cloudName || !uploadPreset) {
-        toast({ title: 'Cloudinary config missing', variant: 'destructive' });
-        setIsUploading(false);
-        return;
-    }
-
-    try {
-        const result = await uploadToCloudinaryXHR(file, cloudName, uploadPreset);
-        await handleUpdatePhotoUrl(result.secure_url);
-    } catch (error) {
-        console.error("Error uploading avatar to Cloudinary:", error);
-        toast({ title: 'Error', description: 'Failed to upload new avatar.', variant: 'destructive' });
-    } finally {
-        setIsUploading(false);
-        setPreviewFile(null);
-    }
-  }, [toast]);
-
 
   const handleSaveChanges = async () => {
     const currentUser = auth.currentUser;
