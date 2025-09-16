@@ -50,11 +50,14 @@ export function MobileProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    // Initial call
     setVisualViewportHeight();
 
-    if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', setVisualViewportHeight);
-        return () => window.visualViewport?.removeEventListener('resize', setVisualViewportHeight);
+    // Attach event listeners
+    const visualViewport = window.visualViewport;
+    if (visualViewport) {
+        visualViewport.addEventListener('resize', setVisualViewportHeight);
+        return () => visualViewport.removeEventListener('resize', setVisualViewportHeight);
     } else {
         // Fallback for older browsers
          window.addEventListener('resize', setVisualViewportHeight);
@@ -85,3 +88,4 @@ export function useMobileDesign() {
   }
   return context;
 }
+
