@@ -524,22 +524,22 @@ function useChatData() {
       status: 'read',
     };
     
-    // Optimistically update AI chat
-    setAiConversation(prev => ({
-        ...prev,
-        messages: [...(prev.messages || []), userMessage],
-        lastMessage: { text: messageText, senderId: currentUser.uid, timestamp: new Date() as any }
-    }));
-    setMessages(prev => [...prev, userMessage]);
-    
+    const tempAiConvo = {
+      ...aiConversation,
+      messages: [...(aiConversation.messages || []), userMessage],
+      lastMessage: { text: messageText, senderId: currentUser.uid, timestamp: new Date() as any }
+    }
+    setAiConversation(tempAiConvo);
+    setSelectedChat(tempAiConvo);
+    setMessages(tempAiConvo.messages);
+
     setIsAiReplying(true);
 
     try {
-      const history = (aiConversation.messages || [])
-          .concat(userMessage) // include the latest message
-          .slice(-10) 
-          .filter(m => !!m.text) // Ensure only text messages are included
-          .map(m => (m.senderId === currentUser.uid ? { user: m.text } : { model: m.text }));
+      const history = (tempAiConvo.messages)
+        .slice(-10)
+        .filter(m => !!m.text)
+        .map(m => (m.senderId === currentUser.uid ? { user: m.text } : { model: m.text }));
 
       const aiResponse = await continueConversation({ message: messageText, history });
 
@@ -558,11 +558,8 @@ function useChatData() {
             messages: newMessages,
             lastMessage: { text: aiResponse.reply, senderId: AI_USER_ID, timestamp: new Date() as any }
           };
-          // If the AI chat is still selected, update the main messages state and selected chat
-          if (selectedChat?.id === AI_USER_ID) {
-              setMessages(newMessages);
-              setSelectedChat(finalAiConvo);
-          }
+          setSelectedChat(finalAiConvo);
+          setMessages(finalAiConvo.messages);
           return finalAiConvo;
       });
 
@@ -578,16 +575,14 @@ function useChatData() {
        setAiConversation(prev => {
           const newMessages = [...(prev.messages || []), errorMessage];
           const finalAiConvo = { ...prev, messages: newMessages };
-          if (selectedChat?.id === AI_USER_ID) {
-              setMessages(newMessages);
-              setSelectedChat(finalAiConvo);
-          }
+          setSelectedChat(finalAiConvo);
+          setMessages(finalAiConvo.messages);
           return finalAiConvo;
         });
     } finally {
       setIsAiReplying(false);
     }
-  }, [currentUser, aiConversation, selectedChat?.id]);
+  }, [currentUser, aiConversation]);
   
   const handleCloudinaryUpload = useCallback(async (file: File, messageText: string, chatId: string, senderId: string): Promise<string> => {
     const tempId = uuidv4();
