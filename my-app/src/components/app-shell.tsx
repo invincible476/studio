@@ -1,4 +1,3 @@
-
 'use client';
 import {
   addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, orderBy, query,
@@ -525,27 +524,21 @@ function useChatData() {
       status: 'read',
     };
     
-    setAiConversation(prev => ({
-        ...prev,
-        messages: [...(prev.messages || []), userMessage],
-        lastMessage: { text: messageText, senderId: currentUser.uid, timestamp: new Date() as any }
-    }));
-    
-    // Update selected chat immediately if it's the AI chat
-    if (selectedChat?.id === AI_USER_ID) {
-        setSelectedChat(prev => ({
-            ...prev!,
-            messages: [...(prev!.messages || []), userMessage],
-            lastMessage: { text: messageText, senderId: currentUser.uid, timestamp: new Date() as any }
-        }));
+    const tempAiConvo = {
+      ...aiConversation,
+      messages: [...(aiConversation.messages || []), userMessage],
+      lastMessage: { text: messageText, senderId: currentUser.uid, timestamp: new Date() as any }
     }
+    setAiConversation(tempAiConvo);
+    setSelectedChat(tempAiConvo);
+    setMessages(tempAiConvo.messages);
 
     setIsAiReplying(true);
 
     try {
-      const history = (aiConversation.messages || [])
+      const history = (tempAiConvo.messages)
         .slice(-10)
-        .filter(m => !!m.text) // Ensure only text messages are sent in history
+        .filter(m => !!m.text)
         .map(m => (m.senderId === currentUser.uid ? { user: m.text } : { model: m.text }));
 
       const aiResponse = await continueConversation({ message: messageText, history });
@@ -565,9 +558,8 @@ function useChatData() {
             messages: newMessages,
             lastMessage: { text: aiResponse.reply, senderId: AI_USER_ID, timestamp: new Date() as any }
           };
-           if (selectedChat?.id === AI_USER_ID) {
-             setSelectedChat(finalAiConvo);
-           }
+          setSelectedChat(finalAiConvo);
+          setMessages(finalAiConvo.messages);
           return finalAiConvo;
       });
 
@@ -581,16 +573,16 @@ function useChatData() {
           status: 'read',
         };
        setAiConversation(prev => {
-          const finalAiConvo = { ...prev, messages: [...(prev.messages || []), errorMessage] };
-           if (selectedChat?.id === AI_USER_ID) {
-             setSelectedChat(finalAiConvo);
-           }
+          const newMessages = [...(prev.messages || []), errorMessage];
+          const finalAiConvo = { ...prev, messages: newMessages };
+          setSelectedChat(finalAiConvo);
+          setMessages(finalAiConvo.messages);
           return finalAiConvo;
         });
     } finally {
       setIsAiReplying(false);
     }
-  }, [currentUser, aiConversation, selectedChat?.id]);
+  }, [currentUser, aiConversation]);
   
   const handleCloudinaryUpload = useCallback(async (file: File, messageText: string, chatId: string, senderId: string): Promise<string> => {
     const tempId = uuidv4();
