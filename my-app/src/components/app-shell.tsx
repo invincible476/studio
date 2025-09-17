@@ -539,7 +539,6 @@ function useChatData() {
     try {
       const history = (tempAiConvo.messages)
         .slice(-10)
-        .filter(m => !!m.text && !m.file) // Only include text messages in history
         .map(m => (m.senderId === currentUser.uid ? { user: m.text } : { model: m.text }));
 
       const aiResponse = await continueConversation({ message: messageText, history });

@@ -5,7 +5,6 @@ import { ChatView } from './chat-view';
 import { useAppShell } from './app-shell';
 import { ChatList } from './chat-list';
 import React from 'react';
-import { useMobileDesign } from './providers/mobile-provider';
 
 export function MobileChatLayout() {
   const {
@@ -18,15 +17,9 @@ export function MobileChatLayout() {
     hasMoreMessages,
     isLoadingMore,
   } = useAppShell();
-  const { height } = useMobileDesign();
-
-  // Use the JS-calculated height. Fallback to 100dvh only if height is 0.
-  const layoutStyle = {
-    height: height ? `${height}px` : '100dvh',
-  };
 
   return (
-    <div className="relative w-full overflow-hidden z-10" style={layoutStyle}>
+    <div className="relative h-dvh w-full overflow-hidden z-10">
       <motion.div
         className="absolute inset-0"
         animate={{ x: selectedChat ? '-100%' : '0%' }}

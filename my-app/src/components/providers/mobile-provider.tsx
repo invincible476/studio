@@ -22,6 +22,7 @@ interface MobileDesignContextType {
   isMobileDesign: boolean;
   setIsMobileDesign: (isMobile: boolean) => void;
   isMobileView: boolean;
+  width: number;
   height: number;
 }
 
@@ -31,7 +32,7 @@ export function MobileProvider({ children }: { children: ReactNode }) {
   const [isMobileDesign, setMobileDesignState] = useState(true);
   const isMobile = useMediaQuery('(max-width: 768px)');
   
-  const [height, setHeight] = useState(0);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     const savedMobileDesign = localStorage.getItem('mobile_redesign');
@@ -40,29 +41,13 @@ export function MobileProvider({ children }: { children: ReactNode }) {
     setMobileDesignState(isEnabled);
     document.body.dataset.mobile = isEnabled ? "true" : "false";
 
-    const setVisualViewportHeight = () => {
-        if (window.visualViewport) {
-            // Use the visualViewport height which correctly accounts for the keyboard
-            setHeight(window.visualViewport.height);
-        } else {
-            // Fallback for older browsers
-            setHeight(window.innerHeight);
-        }
-    };
-
-    // Initial call
-    setVisualViewportHeight();
-
-    // Attach event listeners
-    const visualViewport = window.visualViewport;
-    if (visualViewport) {
-        visualViewport.addEventListener('resize', setVisualViewportHeight);
-        return () => visualViewport.removeEventListener('resize', setVisualViewportHeight);
-    } else {
-        // Fallback for older browsers
-         window.addEventListener('resize', setVisualViewportHeight);
-        return () => window.removeEventListener('resize', setVisualViewportHeight);
+    const handleResize = () => {
+        setDimensions({ width: window.innerWidth, height: window.innerHeight });
     }
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial call
+    
+    return () => window.removeEventListener('resize', handleResize);
 
   }, []);
 
@@ -75,7 +60,7 @@ export function MobileProvider({ children }: { children: ReactNode }) {
   const isMobileView = isMobile && isMobileDesign;
 
   return (
-    <MobileDesignContext.Provider value={{ isMobileDesign, setIsMobileDesign, isMobileView, height }}>
+    <MobileDesignContext.Provider value={{ isMobileDesign, setIsMobileDesign, isMobileView, ...dimensions }}>
       {children}
     </MobileDesignContext.Provider>
   );
