@@ -135,7 +135,7 @@ export default function LoginPage() {
         // After the transaction, update the server timestamp for the current device.
         const updatedDoc = await getDoc(userDocRef);
         const finalDevices = (updatedDoc.data()?.devices || []).map((d: any) => 
-            d.id === deviceId ? { ...d, loggedInAt: Date.now() } : d
+            d.id === deviceId ? { ...d, loggedInAt: serverTimestamp() } : d
         );
         await updateDoc(userDocRef, { devices: finalDevices });
 

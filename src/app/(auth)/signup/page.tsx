@@ -104,7 +104,7 @@ export default function SignupPage() {
         const userDoc = await getDoc(userDocRef);
         const existingDevices = userDoc.data()?.devices || [];
         const updatedDevices = existingDevices.map((d: any) => 
-            d.id === deviceId ? { ...d, loggedInAt: Date.now() } : d
+            d.id === deviceId ? { ...d, loggedInAt: serverTimestamp() } : d
         );
         await updateDoc(userDocRef, { devices: updatedDevices });
 

@@ -290,7 +290,7 @@ function useChatData() {
     if (chat && authUser) {
         const chatRef = doc(db, 'conversations', chat.id);
         await updateDoc(chatRef, {
-            [`lastRead.${authUser.uid}`]: Date.now()
+            [`lastRead.${authUser.uid}`]: serverTimestamp()
         });
     }
 
@@ -418,7 +418,7 @@ function useChatData() {
     const messageData: any = {
       senderId: senderId,
       text: messageText,
-      timestamp: Date.now(),
+      timestamp: serverTimestamp(),
       clientTempId: tempId,
     };
     if (replyTo) messageData.replyTo = replyTo;
@@ -431,7 +431,7 @@ function useChatData() {
           lastMessage: {
               text: messageText,
               senderId: senderId,
-              timestamp: Date.now(),
+              timestamp: serverTimestamp(),
           },
       })
       .commit()
@@ -476,7 +476,7 @@ function useChatData() {
     const messageData: any = {
         senderId,
         text: caption,
-        timestamp: Date.now(),
+        timestamp: serverTimestamp(),
         clientTempId: tempId,
         file: {
             url: base64Data, 
@@ -503,7 +503,7 @@ function useChatData() {
             lastMessage: {
                 text: lastMessageText,
                 senderId: senderId,
-                timestamp: Date.now(),
+                timestamp: serverTimestamp(),
             },
         });
     } catch (error) {
@@ -525,22 +525,22 @@ function useChatData() {
       status: 'read',
     };
     
-    const tempAiConvo = {
-      ...aiConversation,
-      messages: [...(aiConversation.messages || []), userMessage],
-      lastMessage: { text: messageText, senderId: currentUser.uid, timestamp: new Date() as any }
-    }
-    setAiConversation(tempAiConvo);
-    setSelectedChat(tempAiConvo);
-    setMessages(tempAiConvo.messages);
-
+    // Optimistically update AI chat
+    setAiConversation(prev => ({
+        ...prev,
+        messages: [...(prev.messages || []), userMessage],
+        lastMessage: { text: messageText, senderId: currentUser.uid, timestamp: new Date() as any }
+    }));
+    setMessages(prev => [...prev, userMessage]);
+    
     setIsAiReplying(true);
 
     try {
-      const history = (tempAiConvo.messages)
-        .slice(-10)
-        .filter(m => !!m.text)
-        .map(m => (m.senderId === currentUser.uid ? { user: m.text } : { model: m.text }));
+      const history = (aiConversation.messages || [])
+          .concat(userMessage) // include the latest message
+          .slice(-10) 
+          .filter(m => !!m.text) // Ensure only text messages are included
+          .map(m => (m.senderId === currentUser.uid ? { user: m.text } : { model: m.text }));
 
       const aiResponse = await continueConversation({ message: messageText, history });
 
@@ -559,8 +559,11 @@ function useChatData() {
             messages: newMessages,
             lastMessage: { text: aiResponse.reply, senderId: AI_USER_ID, timestamp: new Date() as any }
           };
-          setSelectedChat(finalAiConvo);
-          setMessages(finalAiConvo.messages);
+          // If the AI chat is still selected, update the main messages state and selected chat
+          if (selectedChat?.id === AI_USER_ID) {
+              setMessages(newMessages);
+              setSelectedChat(finalAiConvo);
+          }
           return finalAiConvo;
       });
 
@@ -576,14 +579,16 @@ function useChatData() {
        setAiConversation(prev => {
           const newMessages = [...(prev.messages || []), errorMessage];
           const finalAiConvo = { ...prev, messages: newMessages };
-          setSelectedChat(finalAiConvo);
-          setMessages(finalAiConvo.messages);
+          if (selectedChat?.id === AI_USER_ID) {
+              setMessages(newMessages);
+              setSelectedChat(finalAiConvo);
+          }
           return finalAiConvo;
         });
     } finally {
       setIsAiReplying(false);
     }
-  }, [currentUser, aiConversation]);
+  }, [currentUser, aiConversation, selectedChat?.id]);
   
   const handleCloudinaryUpload = useCallback(async (file: File, messageText: string, chatId: string, senderId: string): Promise<string> => {
     const tempId = uuidv4();
@@ -622,14 +627,14 @@ function useChatData() {
         const finalMessageData = {
             senderId,
             text: messageText || '',
-            timestamp: Date.now(),
+            timestamp: serverTimestamp(),
             clientTempId: tempId,
             file: fileData,
         };
 
         const messageCollectionRef = collection(db, 'conversations', chatId, 'messages');
         await addDoc(messageCollectionRef, finalMessageData);
-        await updateDoc(doc(db, 'conversations', chatId), { lastMessage: { text: messageText || `Sent a ${file.type.split('/')[0]}`, senderId, timestamp: Date.now() } });
+        await updateDoc(doc(db, 'conversations', chatId), { lastMessage: { text: messageText || `Sent a ${file.type.split('/')[0]}`, senderId, timestamp: serverTimestamp() } });
 
         xhrRequests.current.delete(tempId);
         setUploadProgress(prev => { const n = new Map(prev); n.delete(tempId); return n; });
@@ -691,7 +696,7 @@ function useChatData() {
                   const finalMessageData = {
                     senderId: senderId,
                     text: messageText,
-                    timestamp: Date.now(),
+                    timestamp: serverTimestamp(),
                     clientTempId: tempId,
                     file: {
                         url: downloadURL,
@@ -710,7 +715,7 @@ function useChatData() {
                       lastMessage: {
                           text: lastMessageText,
                           senderId: senderId,
-                          timestamp: Date.now(),
+                          timestamp: serverTimestamp(),
                       },
                   });
               } catch(e) {
@@ -768,7 +773,7 @@ function useChatData() {
         const newConvoRef = await addDoc(collection(db, 'conversations'), {
           type: 'private',
           participants: participants,
-          createdAt: Date.now(),
+          createdAt: serverTimestamp(),
           lastMessage: null,
           lastRead: {}
         });
@@ -791,7 +796,7 @@ function useChatData() {
       name: groupName,
       participants: participantUids,
       createdBy: currentUser.uid,
-      createdAt: Date.now(),
+      createdAt: serverTimestamp(),
       lastMessage: null,
       avatar: null,
       lastRead: {}

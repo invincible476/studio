@@ -168,7 +168,7 @@ export default function AccountPage() {
                     avatar: convo.avatar,
                     description: convo.description,
                     createdBy: convo.createdBy === oldUserId ? user.uid : convo.createdBy,
-                    createdAt: Date.now(),
+                    createdAt: serverTimestamp(),
                     lastMessage: null,
                     lastRead: {},
                 };
