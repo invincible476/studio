@@ -1,6 +1,7 @@
 
 'use client';
 
+import { AppShell } from '@/components/app-shell';
 import { ChatLayout } from '@/components/chat-layout';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -12,5 +13,9 @@ export default function Home() {
     return null;
   }
   
-  return <ChatLayout />;
+  return (
+    <AppShell>
+      <ChatLayout />
+    </AppShell>
+  );
 }
