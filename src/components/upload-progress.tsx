@@ -1,4 +1,3 @@
-
 'use client';
 import { X } from 'lucide-react';
 import { Button } from './ui/button';
@@ -30,5 +29,3 @@ export function UploadProgress({ progress, onCancel }: UploadProgressProps) {
     </div>
   );
 }
-
-    

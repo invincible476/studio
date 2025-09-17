@@ -1,4 +1,3 @@
-
 'use client';
 import { ChatList } from './chat-list';
 import { ChatView } from './chat-view';

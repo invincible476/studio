@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Paperclip, SendHorizonal, Mic, Trash2, StopCircle, Play, Smile } from 'lucide-react';

@@ -1,4 +1,3 @@
-
 import { Variants } from 'framer-motion';
 
 export const cardAnimationVariants: Variants = {

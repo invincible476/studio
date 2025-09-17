@@ -1,4 +1,3 @@
-
 'use client';
 import type { Conversation as ConversationType, User, Message as MessageType } from '@/lib/types';
 import { MoreVertical, Phone, Video, Bot, X, Reply, ArrowLeft, Trash2, ArrowDown } from 'lucide-react';

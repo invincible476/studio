@@ -1,4 +1,3 @@
-
 import type { Metadata, Viewport } from 'next';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import './globals.css';
@@ -61,7 +60,7 @@ export default function RootLayout({
             <AppearanceProvider>
               <FriendsProvider>
                 <MobileProvider>
-                  {children}
+                  <main className="relative flex-1 z-10">{children}</main>
                   <Toaster />
                 </MobileProvider>
               </FriendsProvider>

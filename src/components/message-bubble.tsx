@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Message, User } from '@/lib/types';

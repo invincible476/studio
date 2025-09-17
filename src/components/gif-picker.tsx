@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
@@ -17,7 +16,7 @@ import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
 
-const TENOR_API_KEY = process.env.NEXT_PUBLIC_TENOR_API_KEY;
+const TENOR_API_KEY = "LIVDSRZULELA"; // Use a working public key
 
 interface Gif {
   id: string;
@@ -53,10 +52,12 @@ async function fetchGifs(
       return [];
   }
   
+  const clientKey = "my_vibez_app";
   const searchUrl = `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(
     searchTerm
-  )}&key=${TENOR_API_KEY}&limit=20&media_filter=tinygif`;
-  const trendingUrl = `https://tenor.googleapis.com/v2/featured?key=${TENOR_API_KEY}&limit=20&media_filter=tinygif`;
+  )}&key=${TENOR_API_KEY}&client_key=${clientKey}&limit=20&media_filter=tinygif`;
+  
+  const trendingUrl = `https://tenor.googleapis.com/v2/featured?key=${TENOR_API_KEY}&client_key=${clientKey}&limit=20&media_filter=tinygif`;
 
   const url = searchTerm ? searchUrl : trendingUrl;
   

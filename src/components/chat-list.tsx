@@ -1,5 +1,3 @@
-
-
 'use client';
 import { Search, LogOut, Plus, Settings, Star, MoreHorizontal, Bot, Archive, ArchiveRestore, UserPlus, UserCheck, UserX, GalleryHorizontal, Moon, Sun } from 'lucide-react';
 import { Input } from '@/components/ui/input';
