@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
@@ -16,8 +15,6 @@ import Image from 'next/image';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
-
-const TENOR_API_KEY = process.env.NEXT_PUBLIC_TENOR_API_KEY;
 
 interface Gif {
   id: string;
@@ -44,21 +41,10 @@ async function fetchGifs(
   searchTerm: string,
   toast: (options: any) => void
 ): Promise<Gif[]> {
-  if (!TENOR_API_KEY) {
-      toast({
-        title: 'Missing API Key',
-        description: 'The Tenor API key is missing. Please add it to your environment variables.',
-        variant: 'destructive',
-      });
-      return [];
-  }
-  
-  const searchUrl = `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(
-    searchTerm
-  )}&key=${TENOR_API_KEY}&limit=20&media_filter=tinygif`;
-  const trendingUrl = `https://tenor.googleapis.com/v2/featured?key=${TENOR_API_KEY}&limit=20&media_filter=tinygif`;
 
-  const url = searchTerm ? searchUrl : trendingUrl;
+  const url = searchTerm 
+    ? `/api/gifs?q=${encodeURIComponent(searchTerm)}` 
+    : '/api/gifs';
   
   try {
     const response = await fetch(url);
@@ -66,6 +52,9 @@ async function fetchGifs(
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
+    if (!data.results) {
+        return [];
+    }
     return data.results.map((gif: any) => ({
       id: gif.id,
       url: gif.media_formats.gif?.url || gif.media_formats.tinygif.url,
@@ -74,6 +63,11 @@ async function fetchGifs(
     })).filter((g: Gif) => g.url && g.preview);
   } catch (error) {
     console.error('Error fetching GIFs:', error);
+    toast({
+        title: "Error fetching GIFs",
+        description: "There was a problem loading GIFs from the server.",
+        variant: "destructive"
+    })
     return [];
   }
 }

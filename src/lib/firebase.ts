@@ -4,8 +4,7 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, setDoc } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
-// Initialize Firebase
-const app = getFirebaseClientApp();
+const app = getFirebaseClientApp()!;
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
