@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -134,7 +135,7 @@ export default function LoginPage() {
         // After the transaction, update the server timestamp for the current device.
         const updatedDoc = await getDoc(userDocRef);
         const finalDevices = (updatedDoc.data()?.devices || []).map((d: any) => 
-            d.id === deviceId ? { ...d, loggedInAt: serverTimestamp() } : d
+            d.id === deviceId ? { ...d, loggedInAt: Date.now() } : d
         );
         await updateDoc(userDocRef, { devices: finalDevices });
 

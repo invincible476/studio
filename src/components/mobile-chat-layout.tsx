@@ -1,10 +1,10 @@
 
 'use client';
-import { AnimatePresence, motion } from 'framer-motion';
 import { ChatView } from './chat-view';
 import { useAppShell } from './app-shell';
 import { ChatList } from './chat-list';
 import React from 'react';
+import { useMobileKeyboardHeight } from '@/hooks/use-mobile-keyboard-height';
 
 export function MobileChatLayout() {
   const {
@@ -18,39 +18,33 @@ export function MobileChatLayout() {
     isLoadingMore,
   } = useAppShell();
 
+  // Dynamically set height to visible viewport (accounts for keyboard)
+  const { viewportHeight } = useMobileKeyboardHeight();
+
   return (
-    <div className="relative h-dvh w-full overflow-hidden z-10">
-      <motion.div
-        className="absolute inset-0"
-        animate={{ x: selectedChat ? '-100%' : '0%' }}
-        transition={{ duration: 0.3, ease: 'easeInOut' }}
-      >
-        <ChatList />
-      </motion.div>
-      
-      <AnimatePresence>
-        {selectedChat && (
-          <motion.div
-            key="view"
-            className="absolute inset-0"
-            initial={{ x: '100%' }}
-            animate={{ x: '0%' }}
-            exit={{ x: '100%' }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-          >
-            <ChatView
-              chat={selectedChat}
-              isAiReplying={isAiReplying}
-              currentUser={currentUser}
-              onBack={handleBack}
-              messages={messages}
-              loadMoreMessages={loadMoreMessages}
-              hasMoreMessages={hasMoreMessages}
-              isLoadingMore={isLoadingMore}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <div
+      className="flex flex-col w-full h-full overflow-hidden z-10"
+      style={{ height: viewportHeight }}
+    >
+      {/* Only render one main view at a time */}
+      {!selectedChat ? (
+        <div className="flex-1 min-h-0">
+          <ChatList />
+        </div>
+      ) : (
+        <div className="flex-1 min-h-0">
+          <ChatView
+            chat={selectedChat}
+            isAiReplying={isAiReplying}
+            currentUser={currentUser}
+            onBack={handleBack}
+            messages={messages}
+            loadMoreMessages={loadMoreMessages}
+            hasMoreMessages={hasMoreMessages}
+            isLoadingMore={isLoadingMore}
+          />
+        </div>
+      )}
     </div>
   );
 }

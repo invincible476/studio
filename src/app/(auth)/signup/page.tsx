@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -103,7 +104,7 @@ export default function SignupPage() {
         const userDoc = await getDoc(userDocRef);
         const existingDevices = userDoc.data()?.devices || [];
         const updatedDevices = existingDevices.map((d: any) => 
-            d.id === deviceId ? { ...d, loggedInAt: serverTimestamp() } : d
+            d.id === deviceId ? { ...d, loggedInAt: Date.now() } : d
         );
         await updateDoc(userDocRef, { devices: updatedDevices });
 

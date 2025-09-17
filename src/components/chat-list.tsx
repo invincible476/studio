@@ -1,3 +1,5 @@
+
+
 'use client';
 import { Search, LogOut, Plus, Settings, Star, MoreHorizontal, Bot, Archive, ArchiveRestore, UserPlus, UserCheck, UserX, GalleryHorizontal, Moon, Sun } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -175,9 +177,9 @@ export function ChatList() {
 
   const usersForNewChat = allUsers.filter(u => u.uid !== currentUser?.uid && !(currentUser?.blockedUsers || []).includes(u.uid));
 
-  const shouldShowAiChat = useMemo(() => {
-    return aiConversation.name.toLowerCase().includes(searchTerm.toLowerCase());
-  }, [aiConversation, searchTerm]);
+    const shouldShowAiChat = useMemo(() => {
+        return aiConversation?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    }, [aiConversation, searchTerm]);
 
   return (
     <>
@@ -451,7 +453,7 @@ function ChatItem({ conversation, isSelected, currentUser, onSelect, onAction, o
             </div>
             <div className="flex justify-between items-start gap-2">
                 <p className="text-sm text-muted-foreground truncate flex-grow">
-                    {text}
+                    {text.length > 40 ? text.slice(0, 40) + '...' : text}
                 </p>
                 {conversation.unreadCount && conversation.unreadCount > 0 ? (
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground shrink-0">

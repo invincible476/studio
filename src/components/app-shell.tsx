@@ -1,3 +1,4 @@
+
 'use client';
 import {
   addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, orderBy, query,
@@ -289,7 +290,7 @@ function useChatData() {
     if (chat && authUser) {
         const chatRef = doc(db, 'conversations', chat.id);
         await updateDoc(chatRef, {
-            [`lastRead.${authUser.uid}`]: serverTimestamp()
+            [`lastRead.${authUser.uid}`]: Date.now()
         });
     }
 
@@ -417,7 +418,7 @@ function useChatData() {
     const messageData: any = {
       senderId: senderId,
       text: messageText,
-      timestamp: serverTimestamp(),
+      timestamp: Date.now(),
       clientTempId: tempId,
     };
     if (replyTo) messageData.replyTo = replyTo;
@@ -430,7 +431,7 @@ function useChatData() {
           lastMessage: {
               text: messageText,
               senderId: senderId,
-              timestamp: serverTimestamp(),
+              timestamp: Date.now(),
           },
       })
       .commit()
@@ -475,7 +476,7 @@ function useChatData() {
     const messageData: any = {
         senderId,
         text: caption,
-        timestamp: serverTimestamp(),
+        timestamp: Date.now(),
         clientTempId: tempId,
         file: {
             url: base64Data, 
@@ -502,7 +503,7 @@ function useChatData() {
             lastMessage: {
                 text: lastMessageText,
                 senderId: senderId,
-                timestamp: serverTimestamp(),
+                timestamp: Date.now(),
             },
         });
     } catch (error) {
@@ -621,14 +622,14 @@ function useChatData() {
         const finalMessageData = {
             senderId,
             text: messageText || '',
-            timestamp: serverTimestamp(),
+            timestamp: Date.now(),
             clientTempId: tempId,
             file: fileData,
         };
 
         const messageCollectionRef = collection(db, 'conversations', chatId, 'messages');
         await addDoc(messageCollectionRef, finalMessageData);
-        await updateDoc(doc(db, 'conversations', chatId), { lastMessage: { text: messageText || `Sent a ${file.type.split('/')[0]}`, senderId, timestamp: serverTimestamp() } });
+        await updateDoc(doc(db, 'conversations', chatId), { lastMessage: { text: messageText || `Sent a ${file.type.split('/')[0]}`, senderId, timestamp: Date.now() } });
 
         xhrRequests.current.delete(tempId);
         setUploadProgress(prev => { const n = new Map(prev); n.delete(tempId); return n; });
@@ -690,7 +691,7 @@ function useChatData() {
                   const finalMessageData = {
                     senderId: senderId,
                     text: messageText,
-                    timestamp: serverTimestamp(),
+                    timestamp: Date.now(),
                     clientTempId: tempId,
                     file: {
                         url: downloadURL,
@@ -709,7 +710,7 @@ function useChatData() {
                       lastMessage: {
                           text: lastMessageText,
                           senderId: senderId,
-                          timestamp: serverTimestamp(),
+                          timestamp: Date.now(),
                       },
                   });
               } catch(e) {
@@ -767,7 +768,7 @@ function useChatData() {
         const newConvoRef = await addDoc(collection(db, 'conversations'), {
           type: 'private',
           participants: participants,
-          createdAt: serverTimestamp(),
+          createdAt: Date.now(),
           lastMessage: null,
           lastRead: {}
         });
@@ -790,7 +791,7 @@ function useChatData() {
       name: groupName,
       participants: participantUids,
       createdBy: currentUser.uid,
-      createdAt: serverTimestamp(),
+      createdAt: Date.now(),
       lastMessage: null,
       avatar: null,
       lastRead: {}

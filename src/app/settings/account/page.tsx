@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useAuth } from '@/hooks/use-auth';
@@ -167,7 +168,7 @@ export default function AccountPage() {
                     avatar: convo.avatar,
                     description: convo.description,
                     createdBy: convo.createdBy === oldUserId ? user.uid : convo.createdBy,
-                    createdAt: serverTimestamp(),
+                    createdAt: Date.now(),
                     lastMessage: null,
                     lastRead: {},
                 };

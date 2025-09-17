@@ -1,3 +1,4 @@
+
 'use client';
 import { Sidebar, SidebarProvider, SidebarInset, SidebarHeader, SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import { Home, User, Shield, Palette, ArrowLeft, Bell, Mail, Image as ImageIcon, CloudSun } from 'lucide-react';

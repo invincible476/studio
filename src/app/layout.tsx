@@ -1,3 +1,4 @@
+import 'src/lib/global-client-fallback';
 
 import type { Metadata, Viewport } from 'next';
 import { ThemeProvider } from '@/components/providers/theme-provider';
@@ -10,6 +11,7 @@ import { AppearanceProvider } from '@/components/providers/appearance-provider';
 import { MobileProvider } from '@/components/providers/mobile-provider';
 import './mobile.css';
 import { FriendsProvider } from '@/components/providers/friends-provider';
+import { AppShell } from '@/components/app-shell';
 
 const fontPoppins = Poppins({
   subsets: ['latin'],
@@ -61,7 +63,9 @@ export default function RootLayout({
             <AppearanceProvider>
               <FriendsProvider>
                 <MobileProvider>
-                  <main className="relative flex-1 z-10">{children}</main>
+                  <AppShell>
+                    <main className="relative flex-1 z-10">{children}</main>
+                  </AppShell>
                   <Toaster />
                 </MobileProvider>
               </FriendsProvider>

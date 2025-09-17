@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMobileDesign } from './providers/mobile-provider';

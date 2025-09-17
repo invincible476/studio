@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Message, User } from '@/lib/types';
@@ -32,8 +33,31 @@ const isVideo = (fileType: string) => fileType.startsWith('video/');
 const defaultEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 
 const messageVariants = {
-    initial: { opacity: 0, y: 10, scale: 0.95 },
-    animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.2, ease: [0.25, 1, 0.5, 1] } },
+    initial: { opacity: 0, y: 30, scale: 0.8 },
+    animate: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1, 
+      boxShadow: "0 0 24px 0 rgba(0, 200, 255, 0.15)",
+      transition: { 
+        type: 'spring', 
+        bounce: 0.5, 
+        duration: 0.5, 
+        delay: 0.05
+      }
+    },
+    ai: {
+      opacity: 1,
+      y: 0,
+      scale: 1.05,
+      boxShadow: "0 0 32px 0 rgba(0, 200, 255, 0.35)",
+      transition: {
+        type: 'spring',
+        bounce: 0.7,
+        duration: 0.7,
+        delay: 0.1
+      }
+    }
 };
 
 function MessageBubble({ message, sender, isCurrentUser, progress, onCancelUpload, onMessageAction, onReply, isRead }: MessageBubbleProps) {
@@ -214,15 +238,17 @@ function MessageBubble({ message, sender, isCurrentUser, progress, onCancelUploa
     </div>
   );
 
+  const isAiMessage = message.senderId === AI_USER_ID;
   return (
     <motion.div
       variants={messageVariants}
       initial="initial"
-      animate="animate"
+      animate={isAiMessage ? "ai" : "animate"}
       layout
       className={cn(
         'group flex w-full items-start gap-3 relative',
-        isCurrentUser && 'flex-row-reverse'
+        isCurrentUser && 'flex-row-reverse',
+        isAiMessage && 'ring-2 ring-cyan-400/40'
       )}
       // Swipe to reply gesture
       drag="x"
@@ -234,17 +260,18 @@ function MessageBubble({ message, sender, isCurrentUser, progress, onCancelUploa
       <UserAvatar user={sender} className="h-8 w-8" />
       <div
         className={cn(
-          'relative flex max-w-[70%] flex-col rounded-xl shadow-md',
+          'relative flex max-w-[70%] flex-col rounded-xl shadow-md break-words',
           isCurrentUser
             ? 'rounded-tr-none bg-gradient-to-br from-gradient-from to-gradient-to text-primary-foreground animated-gradient'
             : 'rounded-tl-none bg-card',
-            (message.file && !message.text) ? 'p-1.5' : 'px-4 py-2'
+          (message.file && !message.text) ? 'p-1.5' : 'px-4 py-2',
+          isAiMessage && 'animate-pulse'
         )}
+        style={{ wordBreak: 'break-word', overflowWrap: 'anywhere', maxWidth: '70vw' }}
       >
         {!isCurrentUser && (
             <p className="text-sm font-semibold text-primary px-2 pt-1 font-heading">{sender.name}</p>
         )}
-        
         {message.replyTo && (
           <div className={cn(
             "p-2 mb-2 bg-black/20 rounded-md",
@@ -259,9 +286,7 @@ function MessageBubble({ message, sender, isCurrentUser, progress, onCancelUploa
                 </div>
           </div>
         )}
-
         {renderMessageContent()}
-        
         {message.text && (
             <p className={cn(
                 "text-base whitespace-pre-wrap", 
@@ -271,23 +296,26 @@ function MessageBubble({ message, sender, isCurrentUser, progress, onCancelUploa
                 {message.text}
             </p>
         )}
-
         {message.reactions && message.reactions.length > 0 && (
             <div className={cn(
                 "absolute -bottom-4 flex gap-1",
                 isCurrentUser ? 'left-2' : 'right-2'
             )}>
                 {message.reactions.map(r => (
-                    <div key={r.emoji} className="flex items-center bg-background/70 backdrop-blur-md border rounded-full px-2 py-0.5 text-xs shadow">
+                    <motion.div 
+                      key={r.emoji} 
+                      initial={{ scale: 0.7, opacity: 0 }} 
+                      animate={{ scale: 1, opacity: 1 }} 
+                      transition={{ type: 'spring', bounce: 0.6, duration: 0.3 }}
+                      className="flex items-center bg-background/70 backdrop-blur-md border rounded-full px-2 py-0.5 text-xs shadow"
+                    >
                         <span>{r.emoji}</span>
                         <span className="ml-1 font-semibold">{r.count}</span>
-                    </div>
+                    </motion.div>
                 ))}
             </div>
         )}
-        
         {hasContent && !message.deleted && <MessageActions />}
-
         <div className="mt-1 flex items-center gap-2 self-end px-2">
           <p className={cn('text-xs', isCurrentUser ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
             {formattedTimestamp}

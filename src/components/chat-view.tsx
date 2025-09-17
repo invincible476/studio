@@ -1,3 +1,4 @@
+
 'use client';
 import type { Conversation as ConversationType, User, Message as MessageType } from '@/lib/types';
 import { MoreVertical, Phone, Video, Bot, X, Reply, ArrowLeft, Trash2, ArrowDown } from 'lucide-react';
@@ -130,17 +131,16 @@ const ChatViewComponent = ({
     const newMessagesAdded = messages.length > prevMessagesLength.current;
 
     if (newMessagesAdded && messages.length > 0) {
-        const lastMessage = messages[messages.length-1];
-        // If last message is from current user, scroll to bottom
-        if (lastMessage.senderId === currentUser?.uid) {
-            scrollToBottom();
-        } else if (!isAtBottom) {
-            setNewMessagesCount(prev => prev + (messages.length - prevMessagesLength.current));
-        } else {
-            scrollToBottom();
-        }
+      const lastMessage = messages[messages.length-1];
+      // Always scroll to bottom if last message is from AI or current user
+      if (lastMessage.senderId === currentUser?.uid || lastMessage.senderId === 'gemini-ai-chat-bot-7a4b9c1d-f2e3-4d56-a1b2-c3d4e5f6a7b8') {
+        scrollToBottom();
+      } else if (!isAtBottom) {
+        setNewMessagesCount(prev => prev + (messages.length - prevMessagesLength.current));
+      } else {
+        scrollToBottom();
+      }
     }
-    
     prevMessagesLength.current = messages.length;
   }, [messages, isAtBottom, currentUser?.uid, chat, currentUser]);
   
@@ -346,7 +346,9 @@ const ChatViewComponent = ({
         </div>
       </header>
 
-      <div className="flex-1 min-h-0 relative">
+      <div className="flex flex-col h-full min-h-0">
+        {/* Chat content area, scrollable above input */}
+        <div className="flex-1 min-h-0 overflow-y-auto relative">
          {chatBackground && (
           <div className="absolute inset-0 opacity-20 dark:opacity-10">
              {chatBackground && !chatBackground.startsWith('data:image') && (
@@ -362,55 +364,56 @@ const ChatViewComponent = ({
              )}
           </div>
         )}
-        <MessageList 
-            messages={messages}
-            currentUser={currentUser}
-            usersCache={usersCache}
-            uploadProgress={uploadProgress}
-            onCancelUpload={cancelUpload}
-            onMessageAction={handleMessageAction}
-            onReply={onReply}
-            isAiReplying={isAiReplying}
-            otherParticipantLastRead={chat.otherParticipantLastRead}
-            onLoadMore={loadMoreMessages}
-            hasMore={hasMoreMessages}
-            isLoadingMore={isLoadingMore}
-            ref={messageListRef}
-            chatId={chat.id}
-        />
-        {newMessagesCount > 0 && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
-                <Button onClick={scrollToBottom} className="rounded-full shadow-lg">
-                    <ArrowDown className="mr-2 h-4 w-4"/>
-                    {newMessagesCount} New Message{newMessagesCount > 1 && 's'}
-                </Button>
+      <MessageList 
+        messages={messages}
+        currentUser={currentUser}
+        usersCache={usersCache}
+        uploadProgress={uploadProgress}
+        onCancelUpload={cancelUpload}
+        onMessageAction={handleMessageAction}
+        onReply={onReply}
+        isAiReplying={isAiReplying}
+        otherParticipantLastRead={chat.otherParticipantLastRead}
+        onLoadMore={loadMoreMessages}
+        hasMore={hasMoreMessages}
+        isLoadingMore={isLoadingMore}
+        ref={messageListRef}
+        chatId={chat.id}
+      />
+      {newMessagesCount > 0 && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+          <Button onClick={scrollToBottom} className="rounded-full shadow-lg">
+            <ArrowDown className="mr-2 h-4 w-4"/>
+            {newMessagesCount} New Message{newMessagesCount > 1 && 's'}
+          </Button>
+        </div>
+      )}
+    </div>
+    {/* Message input sticky to bottom for mobile */}
+    <div className="sticky bottom-0 left-0 w-full bg-background z-30">
+      {replyToMessage && (
+        <div className="p-2 px-4 border-t border-border/50 bg-background/50 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Reply className="h-4 w-4 text-muted-foreground" />
+            <div className="text-sm">
+              <p className="font-semibold">{replyToMessage.senderId === currentUser.uid ? "You" : usersCache.get(replyToMessage.senderId)?.name}</p>
+              <p className="text-muted-foreground truncate max-w-xs">{replyToMessage.text}</p>
             </div>
-        )}
-      </div>
-
-      <div className="shrink-0">
-         {replyToMessage && (
-            <div className="p-2 px-4 border-t border-border/50 bg-background/50 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                    <Reply className="h-4 w-4 text-muted-foreground" />
-                    <div className="text-sm">
-                        <p className="font-semibold">{replyToMessage.senderId === currentUser.uid ? "You" : usersCache.get(replyToMessage.senderId)?.name}</p>
-                        <p className="text-muted-foreground truncate max-w-xs">{replyToMessage.text}</p>
-                    </div>
-                </div>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setReplyToMessage(null)}>
-                    <X className="h-4 w-4" />
-                </Button>
-            </div>
-        )}
-        <MessageInput
-            onSendMessage={handleSendMessageWithReply}
-            onFileSelect={handleFileSelect}
-            onGifSelect={handleSendGif}
-            onTyping={handleTyping}
-            isAiChat={isAIChat}
-        />
-      </div>
+          </div>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setReplyToMessage(null)}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+      <MessageInput
+        onSendMessage={handleSendMessageWithReply}
+        onFileSelect={handleFileSelect}
+        onGifSelect={handleSendGif}
+        onTyping={handleTyping}
+        isAiChat={isAIChat}
+      />
+    </div>
+    </div>
       
       {isGroupChat ? (
           <GroupProfileSheet 

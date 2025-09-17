@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Sheet,
@@ -12,7 +13,7 @@ import { Separator } from './ui/separator';
 import { BellOff, Ban, Bell, MessageSquareText, Shield, UserPlus, Check, UserCheck, X, UserX } from 'lucide-react';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
-import React, { } from 'react';
+import React, from 'react';
 
 interface UserProfileSheetProps {
   user: User;

@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
@@ -219,7 +220,7 @@ export default function FriendsPage() {
                             {sentRequests.length > 0 ? (
                                 <div className="space-y-2">
                                     {sentRequests.map(sentRequestUser => (
-                                        <div key={sentRequestUser.uid} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/so_50">
+                                        <div key={sentRequestUser.uid} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
                                             <div className="flex items-center gap-3">
                                                 <UserAvatar user={sentRequestUser} className="h-12 w-12"/>
                                                 <div>

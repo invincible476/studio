@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,7 +59,7 @@ async function uploadToCloudinaryXHR(
 
 function ProfileSkeleton() {
     return (
-        <div className="space-y-8 animate-fade-in p-4 sm:p-6 lg:p-8">
+        <div className="space-y-8 animate-fade-in">
             <div>
                 <Skeleton className="h-9 w-40" />
                 <Skeleton className="h-5 w-64 mt-2" />
@@ -96,6 +97,7 @@ function ProfileSkeleton() {
     )
 }
 
+
 export default function ProfilePage() {
   const { user: authUser, loading: authLoading } = useAuth();
   const [user, setUser] = useState<UserType | null>(null);
@@ -109,45 +111,11 @@ export default function ProfilePage() {
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+
   const [previewFile, setPreviewFile] = useState<File | null>(null);
   const { appBackground, useCustomBackground } = useAppearance();
 
-  const handleUpdatePhotoUrl = useCallback(async (newPhotoUrl: string) => {
-    const currentUser = auth.currentUser;
-    if (!currentUser) throw new Error("No authenticated user found.");
-    
-    await updateProfile(currentUser, { photoURL: newPhotoUrl });
-    
-    const userDocRef = doc(db, 'users', currentUser.uid);
-    await updateDoc(userDocRef, { photoURL: newPhotoUrl });
-    
-    setAvatarUrl(newPhotoUrl);
-    toast({ title: 'Success', description: 'Your avatar has been updated.' });
-  }, [toast]);
-
-  const handleAvatarUpload = useCallback(async (file: File) => {
-    setIsUploading(true);
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-
-    if (!cloudName || !uploadPreset) {
-        toast({ title: 'Cloudinary config missing', variant: 'destructive' });
-        setIsUploading(false);
-        return;
-    }
-
-    try {
-        const result = await uploadToCloudinaryXHR(file, cloudName, uploadPreset);
-        await handleUpdatePhotoUrl(result.secure_url);
-    } catch (error) {
-        console.error("Error uploading avatar to Cloudinary:", error);
-        toast({ title: 'Error', description: 'Failed to upload new avatar.', variant: 'destructive' });
-    } finally {
-        setIsUploading(false);
-        setPreviewFile(null);
-    }
-  }, [toast, handleUpdatePhotoUrl]);
-
+  
   useEffect(() => {
     if (authLoading) return;
     if (!authUser) {
@@ -171,19 +139,34 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, [authUser, authLoading]);
 
-  // Conditional returns must come AFTER all hooks have been called.
+
   if (loading || authLoading) {
     return <ProfileSkeleton />;
   }
 
   if (!user) {
-    return <div className="text-center text-muted-foreground p-8">User not found. Please log in again.</div>;
+    return <div className="text-center text-muted-foreground">User not found. Please log in again.</div>;
   }
 
   const handleNameInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value);
   }
   
+ const handleUpdatePhotoUrl = async (newPhotoUrl: string) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error("No authenticated user found.");
+    
+    // Update Firebase Auth profile
+    await updateProfile(currentUser, { photoURL: newPhotoUrl });
+    
+    // Update Firestore document
+    const userDocRef = doc(db, 'users', currentUser.uid);
+    await updateDoc(userDocRef, { photoURL: newPhotoUrl });
+    
+    setAvatarUrl(newPhotoUrl);
+    toast({ title: 'Success', description: 'Your avatar has been updated.' });
+  }
+
   const handleSetAvatarFromUrl = async () => {
     if (!avatarUrl) {
       toast({ title: 'Error', description: 'Please enter a URL.', variant: 'destructive' });
@@ -208,6 +191,30 @@ export default function ProfilePage() {
         if(fileInputRef.current) fileInputRef.current.value = '';
     }
   };
+
+  const handleAvatarUpload = useCallback(async (file: File) => {
+    setIsUploading(true);
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+    if (!cloudName || !uploadPreset) {
+        toast({ title: 'Cloudinary config missing', variant: 'destructive' });
+        setIsUploading(false);
+        return;
+    }
+
+    try {
+        const result = await uploadToCloudinaryXHR(file, cloudName, uploadPreset);
+        await handleUpdatePhotoUrl(result.secure_url);
+    } catch (error) {
+        console.error("Error uploading avatar to Cloudinary:", error);
+        toast({ title: 'Error', description: 'Failed to upload new avatar.', variant: 'destructive' });
+    } finally {
+        setIsUploading(false);
+        setPreviewFile(null);
+    }
+  }, [toast]);
+
 
   const handleSaveChanges = async () => {
     const currentUser = auth.currentUser;
@@ -275,10 +282,11 @@ export default function ProfilePage() {
   }
 
   const isSaveDisabled = !user || (name === user.name && about === (user.about || ''));
+  
 
   return (
     <motion.div 
-        className="space-y-8 p-4 sm:p-6 lg:p-8"
+        className="space-y-8"
         initial="initial"
         animate="animate"
         variants={{

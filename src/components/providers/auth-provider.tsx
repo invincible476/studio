@@ -1,3 +1,4 @@
+
 'use client';
 import { auth } from '@/lib/firebase';
 import { signOut as firebaseSignOut, Auth, getRedirectResult } from 'firebase/auth';

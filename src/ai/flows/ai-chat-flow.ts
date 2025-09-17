@@ -1,5 +1,4 @@
-
-'use server';
+"use server";
 /**
  * @fileOverview A flow for having a conversation with an AI.
  *
@@ -25,10 +24,6 @@ const AiChatOutputSchema = z.object({
 });
 export type AiChatOutput = z.infer<typeof AiChatOutputSchema>;
 
-export async function continueConversation(input: AiChatInput): Promise<AiChatOutput> {
-  return continueConversationFlow(input);
-}
-
 const prompt = ai.definePrompt({
   name: 'aiChatPrompt',
   input: {schema: AiChatInputSchema},
@@ -52,7 +47,24 @@ const continueConversationFlow = ai.defineFlow(
     outputSchema: AiChatOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    try {
+        const {output} = await prompt(input);
+        if (!output) {
+            throw new Error("No output from AI prompt.");
+        }
+        return output;
+    } catch (error: any) {
+        console.error("Error in continueConversationFlow:", error);
+        // Check for specific rate limit error message
+        if (error.message && error.message.includes('429')) {
+             return { reply: "I've been talking a lot today and need a little break. Please try again later. You may need to check your API plan and billing details." };
+        }
+        return { reply: "Sorry, I'm having trouble connecting right now. Please try again in a moment." };
+    }
   }
 );
+
+export async function continueConversation(input: AiChatInput): Promise<AiChatOutput> {
+  return await continueConversationFlow(input);
+}
+

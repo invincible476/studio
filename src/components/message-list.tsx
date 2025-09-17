@@ -15,10 +15,14 @@ import { UserAvatar } from './user-avatar';
 const AI_USER_ID = 'gemini-ai-chat-bot-7a4b9c1d-f2e3-4d56-a1b2-c3d4e5f6a7b8';
 
 const messageListVariants = {
-    initial: {},
+    initial: { opacity: 0 },
     animate: {
+        opacity: 1,
         transition: {
-            staggerChildren: 0.08,
+            staggerChildren: 0.12,
+            type: 'spring',
+            bounce: 0.3,
+            duration: 0.6
         }
     }
 };
@@ -136,9 +140,15 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(({
                     variants={messageListVariants}
                     initial="initial"
                     animate="animate"
+                    layout
                 >
                     {hasMore && (
-                        <div className="flex justify-center">
+                        <motion.div 
+                          className="flex justify-center" 
+                          initial={{ opacity: 0, y: -10 }} 
+                          animate={{ opacity: 1, y: 0 }} 
+                          transition={{ duration: 0.4 }}
+                        >
                             <Button
                                 variant="secondary"
                                 onClick={handleLoadMore}
@@ -149,12 +159,11 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(({
                                 ) : null}
                                 Load Older Messages
                             </Button>
-                        </div>
+                        </motion.div>
                     )}
                     {visibleMessages.length > 0 ? (
                     visibleMessages.map((message, index) => {
                         const sender = getParticipantDetails(message.senderId);
-                        
                         let isRead = false;
                         if(otherParticipantLastRead && message.timestamp && message.senderId === currentUser.uid) {
                             const messageDate = convertToDate(message.timestamp);
@@ -163,7 +172,6 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(({
                                 isRead = messageDate <= lastReadDate;
                             }
                         }
-
                         let dateSeparator = null;
                         const currentMessageDate = convertToDate(message.timestamp);
                         if (currentMessageDate) {
@@ -176,46 +184,64 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(({
                                 }
                             }
                         }
-
                         return (
                             <Fragment key={message.id || message.clientTempId}>
                                 {dateSeparator && (
-                                    <div className="relative text-center my-4">
+                                    <motion.div 
+                                      className="relative text-center my-4" 
+                                      initial={{ opacity: 0, y: -10 }} 
+                                      animate={{ opacity: 1, y: 0 }} 
+                                      transition={{ duration: 0.4 }}
+                                    >
                                         <hr className="absolute top-1/2 left-0 w-full -translate-y-1/2" />
                                         <span className="relative bg-background px-2 text-xs text-muted-foreground">{dateSeparator}</span>
-                                    </div>
+                                    </motion.div>
                                 )}
-                                <MemoizedMessageBubble
-                                    message={message}
-                                    sender={sender}
-                                    isCurrentUser={sender?.uid === currentUser.uid}
-                                    progress={uploadProgress.get(message.clientTempId || message.id)}
-                                    onCancelUpload={() => onCancelUpload(message.clientTempId || message.id)}
-                                    onMessageAction={onMessageAction}
-                                    onReply={onReply}
-                                    isRead={isRead}
-                                />
+                                {message && sender ? (
+                                    <MemoizedMessageBubble
+                                        message={message}
+                                        sender={sender}
+                                        isCurrentUser={sender?.uid === currentUser.uid}
+                                        progress={uploadProgress.get(message.clientTempId || message.id)}
+                                        onCancelUpload={() => onCancelUpload(message.clientTempId || message.id)}
+                                        onMessageAction={onMessageAction}
+                                        onReply={onReply}
+                                        isRead={isRead}
+                                    />
+                                ) : (
+                                    <div className="text-muted-foreground text-xs px-2 py-1">Invalid message data.</div>
+                                )}
                             </Fragment>
                         );
                     })
                     ) : (
-                    <div className="flex justify-center items-center h-full">
+                    <motion.div 
+                      className="flex justify-center items-center h-full" 
+                      initial={{ opacity: 0 }} 
+                      animate={{ opacity: 1 }} 
+                      transition={{ duration: 0.5 }}
+                    >
                         <div className="text-center p-4 rounded-lg bg-background/50">
                         <p className="text-muted-foreground">
                             No messages in this chat yet.
                         </p>
                         </div>
-                    </div>
+                    </motion.div>
                     )}
                     {isAiReplying && (
-                    <div className="flex items-start gap-3">
+                    <motion.div 
+                      className="flex items-start gap-3" 
+                      initial={{ opacity: 0, scale: 0.8 }} 
+                      animate={{ opacity: 1, scale: 1 }} 
+                      transition={{ type: 'spring', bounce: 0.5, duration: 0.5 }}
+                    >
                         <UserAvatar user={usersCache.get(AI_USER_ID)!} className="h-8 w-8" />
                         <div className="bg-card/80 backdrop-blur-sm rounded-xl px-4 py-2 rounded-tl-none flex items-center gap-2">
                         <span className="h-2 w-2 bg-muted-foreground rounded-full animate-pulse delay-0"></span>
                         <span className="h-2 w-2 bg-muted-foreground rounded-full animate-pulse delay-150"></span>
                         <span className="h-2 w-2 bg-muted-foreground rounded-full animate-pulse delay-300"></span>
                         </div>
-                    </div>
+                    </motion.div>
                     )}
                 </motion.div>
             </div>
@@ -223,3 +249,7 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(({
     );
 });
 MessageList.displayName = 'MessageList';
+
+    
+
+    
