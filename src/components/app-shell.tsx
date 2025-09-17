@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useNotifications } from '@/hooks/use-notifications';
 import { db, storage } from '@/lib/firebase';
 import type { Conversation, Message, Story, User, StoryReaction } from '@/lib/types';
+import { AI_USER_ID, AI_USER_NAME, AI_AVATAR_URL } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { StoryViewer } from './story-viewer';
 import { StoriesContext } from './providers/stories-provider';
@@ -23,11 +24,6 @@ import { AuraBackground } from './aura-background';
 import { GridBackground } from './grid-background';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MobileGalaxyBackground } from './mobile-galaxy-background';
-
-
-const AI_USER_ID = 'gemini-ai-chat-bot-7a4b9c1d-f2e3-4d56-a1b2-c3d4e5f6a7b8';
-const AI_USER_NAME = 'Gemini';
-const AI_AVATAR_URL = '/gemini-logo.svg';
 
 const PAGE_SIZE = 30;
 
